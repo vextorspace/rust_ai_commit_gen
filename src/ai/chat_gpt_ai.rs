@@ -60,6 +60,6 @@ mod tests {
         let diff = String::from("diff --git a/main.rs b/main.rs\nnew file mode 100644\nindex 0000000..e69de29\n--- a/main.rs\n+++ b/main.rs\n@@ -0,0 +1 @@\n+println!(\"Hippo\");\n");
         let prompt = chat_gpt.make_diff_prompt(diff);
 
-        assert!(prompt.contains("Hippo"));
+        assert!(prompt.contains(diff.as_str()));
     }
 }
