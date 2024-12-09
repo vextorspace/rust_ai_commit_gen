@@ -1,3 +1,8 @@
+use std::path::Path;
+use ai_commit_message::commit_generator::CommitGenerator;
+use ai_commit_message::git::diff_provider::DiffProvider;
+use ai_commit_message::git::git_diff::GitDiff;
+
 mod git;
 
 fn main() {
@@ -5,27 +10,20 @@ fn main() {
 
     fn main() {
         let args: Vec<String> = env::args().collect();
-        let path = if args.len() > 1 {
-            &args[1];
+        let path: &Path = if args.len() > 1 {
+            Path::new(args[1].as_str())
         } else {
-            "";
+            Path::new("")
         };
 
+        let differ: Box<dyn DiffProvider> = Box::new(GitDiff::new());
+        let commit_generator = CommitGenerator::new().with_differ(differ);
 
-        use std::process::Command;
 
-        let output = Command::new("git")
-            .arg("diff")
-            .output()
-            .expect("Failed to execute git diff");
 
-        if output.status.success() {
-            let diff = String::from_utf8_lossy(&output.stdout);
-            println!("Git diff output:\n{}", diff);
-        } else {
-            let error_message = String::from_utf8_lossy(&output.stderr);
-            println!("Git diff failed with error:\n{}", error_message);
-        }
+
+
+
     }
 }
 

@@ -1,15 +1,10 @@
 use std::io::Error;
-use std::ops::Deref;
 use std::path::Path;
 use std::process::Command;
+use crate::git::diff_provider::DiffProvider;
 
-trait DiffProvider {
-    fn diff(path: Box<Path>) -> Result<String, Error>;
+pub struct GitDiff{
 }
-
-struct GitDiff{
-}
-
 
 impl GitDiff {
     pub fn new() -> Self {
@@ -18,7 +13,7 @@ impl GitDiff {
 }
 
 impl DiffProvider for GitDiff {
-    fn diff(path: Box<Path>) -> Result<String, Error> {
+    fn diff(&self, path: Box<Path>) -> Result<String, Error> {
         if let Some(path_str) = path.to_str() {
             let output = Command::new("git")
                 .arg("diff")
@@ -26,18 +21,18 @@ impl DiffProvider for GitDiff {
                 .output()?;
 
             if output.status.success() {
-                return Ok(String::from_utf8_lossy(&output.stdout).into_owned());
+                Ok(String::from_utf8_lossy(&output.stdout).into_owned())
             } else {
-                return Err(Error::new(
+                Err(Error::new(
                     std::io::ErrorKind::Other,
                     String::from_utf8_lossy(&output.stderr).into_owned(),
-                ));
+                ))
             }
         } else {
-            return Err(Error::new(
+            Err(Error::new(
                 std::io::ErrorKind::InvalidInput,
                 "Invalid path provided.",
-            ));
+            ))
         }
     }
 }
