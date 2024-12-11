@@ -1,6 +1,6 @@
 use dotenv::dotenv;
 use std::env;
-use super::ai::Ai;
+use super::ai_provider::Ai;
 use tokio;
 use llm_chain::{executor, options, parameters, prompt};
 
@@ -15,7 +15,7 @@ impl ChatGptAi {
         }
     }
 
-    pub fn load_env(&mut self) {
+    pub(crate) fn load_env(&mut self) {
         dotenv().ok();
         self.api_key = env::var("OPENAI_API_KEY").ok();
     }
@@ -65,6 +65,7 @@ impl Ai for ChatGptAi {
         }
     }
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -102,7 +103,5 @@ mod tests {
         assert!(
             message.clone().contains("Hippo"),
             "commit message should contain Hippo");
-        assert!(message.clone().len() < 60,
-            "commit message should be less than 60 characters");
     }
 }

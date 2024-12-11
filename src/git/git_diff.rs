@@ -13,7 +13,7 @@ impl GitDiff {
 }
 
 impl DiffProvider for GitDiff {
-    fn diff(&self, path: Box<Path>) -> Result<String, Error> {
+    fn diff(&self, path: &Path) -> Result<String, Error> {
         if let Some(path_str) = path.to_str() {
             let output = Command::new("git")
                 .arg("diff")

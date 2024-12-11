@@ -1,2 +1,2 @@
-pub mod ai;
-mod chat_gpt_ai;
+pub mod ai_provider;
+pub mod chat_gpt_ai;
