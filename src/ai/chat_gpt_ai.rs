@@ -1,8 +1,11 @@
 use dotenv::dotenv;
 use std::env;
-use super::ai_provider::Ai;
+use super::ai_provider::AiProvider;
 use tokio;
 use llm_chain::{executor, options, parameters, prompt};
+use anyhow::{anyhow, Context, Error, Result};
+use llm_chain::traits::ExecutorCreationError;
+use llm_chain_openai::chatgpt::Executor;
 
 pub struct ChatGptAi {
     api_key: Option<String>,
@@ -34,34 +37,47 @@ impl ChatGptAi {
 
         prompt
     }
-}
 
-impl Ai for ChatGptAi {
-    fn generate_commit_message(&self, diff: String) -> Result<String, Box<dyn std::error::Error>> {
+    fn query_ai_for_commit_message(&self, diff: String, key: String) -> Result<String> {
+        let prompt = self.make_diff_prompt(diff);
 
-        if let Some(key) = self.api_key.clone() {
-            let prompt = self.make_diff_prompt(diff);
-
-            let options = options! {
+        let options = options! {
                 ApiKey: key
             };
 
-            let exec = executor!(chatgpt, options);
-            match exec {
-                Ok(exec) => {
+        let exec = executor!(chatgpt, options);
 
-                    let runtime = tokio::runtime::Runtime::new()?;
-                    runtime.block_on(async {
-                        let res = prompt!(prompt)
-                            .run(&parameters!(), &exec) // ...and run it
-                            .await;
-                        res.map_or(Err("No response from AI".into()), |r| Ok(r.to_string()))
-                    })
-                }
-                Err(err) => Err(err.into()),
-            }
-        } else { 
-            Err("API key is not set in the environment variables".into())
+        let res = exec.map(|exec| {
+            return Self::do_query_synchronously(prompt, &exec);
+        });
+
+        match res {
+            Ok(result) => {Ok(result?)}
+            Err(err) => {Err(anyhow!("failed to execute AI query: {}", err))}
+        }
+    }
+
+    fn do_query_synchronously(prompt: String, exec: &Executor) -> Result<String> {
+        let runtime = tokio::runtime::Runtime::new().unwrap();
+        let res = runtime.block_on(async {
+            prompt!(prompt)
+                .run(&parameters!(), exec)
+                .await
+        });
+        match res {
+            Ok(result) => { Ok(result.to_string()) }
+            Err(err) => { Err(anyhow!("failed to run executor query: {}", err)) }
+        }
+    }
+}
+
+impl AiProvider for ChatGptAi {
+    fn generate_commit_message(&self, diff: String) -> Result<String> {
+
+        if let Some(key) = self.api_key.clone() {
+            self.query_ai_for_commit_message(diff, key)
+        } else {
+            Err(anyhow!("No API key."))
         }
     }
 }

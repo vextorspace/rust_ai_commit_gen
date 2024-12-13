@@ -4,7 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = "1.0.94"
 dotenv = "0.15.0"
 llm-chain = "0.13.0"
 llm-chain-openai = "0.13.0"
 tokio = { version = "1.42.0", features = ["rt-multi-thread"] }
+
+[dev-dependencies]
+mockall = "0.13.1"

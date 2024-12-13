@@ -1,4 +1,4 @@
-use std::io::Error;
+use anyhow::{Result, anyhow};
 use std::path::Path;
 use std::process::Command;
 use crate::git::diff_provider::DiffProvider;
@@ -13,7 +13,7 @@ impl GitDiff {
 }
 
 impl DiffProvider for GitDiff {
-    fn diff(&self, path: &Path) -> Result<String, Error> {
+    fn diff(&self, path: &Path) -> Result<String> {
         if let Some(path_str) = path.to_str() {
             let output = Command::new("git")
                 .arg("diff")
@@ -23,16 +23,12 @@ impl DiffProvider for GitDiff {
             if output.status.success() {
                 Ok(String::from_utf8_lossy(&output.stdout).into_owned())
             } else {
-                Err(Error::new(
-                    std::io::ErrorKind::Other,
-                    String::from_utf8_lossy(&output.stderr).into_owned(),
+                Err(anyhow!(
+                    String::from_utf8_lossy(&output.stderr).into_owned()
                 ))
             }
         } else {
-            Err(Error::new(
-                std::io::ErrorKind::InvalidInput,
-                "Invalid path provided.",
-            ))
+            Err(anyhow!("Invalid path provided."))
         }
     }
 }
