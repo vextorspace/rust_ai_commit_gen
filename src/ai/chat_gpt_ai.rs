@@ -23,7 +23,7 @@ impl ChatGptAi {
     }
 
     pub(crate) fn make_diff_prompt(&self, diff: String) -> String {
-        let prompt = format!("
+        format!("
                             You are a terse and efficient developer.
                             You only state the most important changes in commit messages.
                             Each change should be on its own line.
@@ -32,9 +32,7 @@ impl ChatGptAi {
                             An added or removed file should be mentioned in the message.
                                 the diff is: {diff}:
 
-                            Write a non-generic commit message. ", diff = diff);
-
-        prompt
+                            Write a non-generic commit message. ", diff = diff)
     }
 
     fn query_ai_for_commit_message(&self, diff: String, key: String) -> Result<String> {
@@ -51,7 +49,9 @@ impl ChatGptAi {
         });
 
         match res {
-            Ok(result) => {Ok(result?)}
+            Ok(result) => {
+                Ok(result?)
+            }
             Err(err) => {Err(anyhow!("failed to execute AI query: {}", err))}
         }
     }

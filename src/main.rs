@@ -14,7 +14,6 @@ fn main() {
         current_dir().expect("could not get current directory and no path specified")
     };
 
-
     let differ: Box<dyn DiffProvider> = Box::new(GitDiff::new());
     let mut ai = ChatGptAi::new();
     ai.load_env();
