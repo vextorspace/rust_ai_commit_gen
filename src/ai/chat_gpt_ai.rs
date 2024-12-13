@@ -4,7 +4,6 @@ use super::ai_provider::AiProvider;
 use tokio;
 use llm_chain::{executor, options, parameters, prompt};
 use anyhow::{anyhow, Context, Error, Result};
-use llm_chain::traits::ExecutorCreationError;
 use llm_chain_openai::chatgpt::Executor;
 
 pub struct ChatGptAi {
@@ -18,7 +17,7 @@ impl ChatGptAi {
         }
     }
 
-    pub(crate) fn load_env(&mut self) {
+    pub fn load_env(&mut self) {
         dotenv().ok();
         self.api_key = env::var("OPENAI_API_KEY").ok();
     }
