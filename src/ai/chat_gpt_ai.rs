@@ -3,7 +3,7 @@ use std::env;
 use super::ai_provider::AiProvider;
 use tokio;
 use llm_chain::{executor, options, parameters, prompt};
-use anyhow::{anyhow, Context, Error, Result};
+use anyhow::{anyhow, Result};
 use llm_chain_openai::chatgpt::Executor;
 
 pub struct ChatGptAi {
